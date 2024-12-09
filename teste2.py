@@ -58,4 +58,5 @@ while True:
     with placeholder3:
         st.table(df3)
     # Intervalo de atualização
-    time.sleep(60)  # Atualiza os dados a cada 60 segundos
+    with st.spinner('Wait for it...'):
+        time.sleep(60)  # Atualiza os dados a cada 60 segundos
