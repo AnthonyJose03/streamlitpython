@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import sqlalchemy
+import time
 
 # configuração do site
 st.set_page_config(page_title="Dados", layout='wide')
@@ -15,6 +16,11 @@ nome_do_banco = 'postgres'
 # Criação da conexão com o banco de dados
 engine = sqlalchemy.create_engine(f'postgresql+psycopg2://{usuario}:{senha}@{host}:{porta}/{nome_do_banco}', connect_args={"client_encoding": "utf8"})
 
+# Função genérica para carregar dados com query personalizada
+@st.cache_data(ttl=20)  # Atualiza os dados a cada 5 segundos automaticamente
+def load_custom_query(query):
+    df = pd.read_sql(query, engine)
+    return df
 
 consulta = """
 SELECT * FROM Autores;
@@ -24,7 +30,11 @@ consulta2 = """
 SELECT * FROM Membros;
 """
 
- # Layout com 3 colunas
+consulta3 = """
+SELECT * FROM Emprestimos;
+"""
+
+# Layout com 3 colunas
 st.title("Atualização Dinâmica de Dados")
 col1, col2, col3 = st.columns(3)
 
@@ -44,9 +54,8 @@ while True:
     with placeholder1:
         st.table(df1)
     with placeholder2:
-        st.bar_chart(df2, x='municipio', y='nacionalidade')
+        st.table(df2)
     with placeholder3:
-        st.bar_chart(df3, x='fornecedor', y='valor')
-
+        st.table(df3)
     # Intervalo de atualização
-    time.sleep(60)  # Atualiza os dados a cada 30 segundos
+    time.sleep(60)  # Atualiza os dados a cada 60 segundos
