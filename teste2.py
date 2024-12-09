@@ -24,10 +24,29 @@ consulta2 = """
 SELECT * FROM Membros;
 """
 
-df1 = pd.read_sql_query(consulta, con=engine)
-df2 = pd.read_sql_query(consulta2, con=engine)
+ # Layout com 3 colunas
+st.title("Atualização Dinâmica de Dados")
+col1, col2, col3 = st.columns(3)
 
-st.header("Criando Streamlit")
+# Placeholders para atualizar os dados dinamicamente
+placeholder1 = col1.empty()
+placeholder2 = col2.empty()
+placeholder3 = col3.empty()
 
-st.table(df1)
-st.table(df2)
+# Atualização contínua
+while True:
+    # Carregar os dados das queries
+    df1 = load_custom_query(consulta)
+    df2 = load_custom_query(consulta2)
+    df3 = load_custom_query(consulta3)
+
+    # Atualizar as tabelas nos placeholders
+    with placeholder1:
+        st.table(df1)
+    with placeholder2:
+        st.bar_chart(df2, x='municipio', y='nacionalidade')
+    with placeholder3:
+        st.bar_chart(df3, x='fornecedor', y='valor')
+
+    # Intervalo de atualização
+    time.sleep(60)  # Atualiza os dados a cada 30 segundos
