@@ -140,17 +140,21 @@ order by
     ano, mes, quantidade_emprestimos desc
 """
 
-# transformação de query
-status = pd.read_sql_query(status_aluno, con=engine)
-emp_aluno = pd.read_sql_query(qtd_emp_aluno_por_mes, con=engine)
-datas_emp = pd.read_sql_query(datas_emp, con=engine)
-genero_m_emprestados = pd.read_sql_query(genero_m_emprestados, con=engine)
-qtd_livros = pd.read_sql_query(qtd_livros, con=engine)
-qtd_livro_emprestado = pd.read_sql_query(qtd_livro_emprestado, con=engine)
-livros_m_emprestados = pd.read_sql_query(livros_m_emprestados, con=engine)
-emp_aluno2 = pd.read_sql_query(emp_aluno2, con=engine)
-livros_mais_emprestados = pd.read_sql_query(livros_mais_emprestados_query, con=engine)
-qtd_emprestimo_mes = pd.read_sql_query(qtd_emprestimo_mes, con=engine)
+@st.cache_data  # Cache por 1 hora
+def execute_query(query):
+    return pd.read_sql_query(query, con=engine)
+
+# Transformação de query
+status = execute_query(status_aluno)
+emp_aluno = execute_query(qtd_emp_aluno_por_mes)
+datas_emp = execute_query(datas_emp)
+genero_m_emprestados = execute_query(genero_m_emprestados)
+qtd_livros = execute_query(qtd_livros)
+qtd_livro_emprestado = execute_query(qtd_livro_emprestado)
+livros_m_emprestados = execute_query(livros_m_emprestados)
+emp_aluno2 = execute_query(emp_aluno2)
+livros_mais_emprestados = execute_query(livros_mais_emprestados_query)
+qtd_emprestimo_mes = execute_query(qtd_emprestimo_mes)
 
 
 qtd_emprestimo_mes['ano'] = qtd_emprestimo_mes['ano'].astype(int)
