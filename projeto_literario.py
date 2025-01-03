@@ -105,15 +105,21 @@ ORDER BY
 """
 
 genero_m_emprestados = """
-select
-	g.nome as genero,
-	count(g.nome) as quantidade
-from
-	rel_livro_genero rlg
-left outer join
-	genero g on rlg.id_livro = g.id
-group by
-	g.nome
+SELECT
+    EXTRACT(YEAR FROM e.data_emprestimo) AS ano,
+    EXTRACT(MONTH FROM e.data_emprestimo) AS mes,
+    g.nome AS genero,
+    COUNT(DISTINCT g.id) AS quantidade
+FROM
+    rel_livro_genero rlg
+LEFT OUTER JOIN
+    genero g ON rlg.id_genero = g.id
+LEFT OUTER JOIN
+    emprestimo e ON rlg.id_livro = e.id_livro
+GROUP BY
+    ano, mes, g.nome
+ORDER BY
+    ano DESC, mes DESC, genero;
 """
 
 qtd_livros = """
@@ -169,13 +175,18 @@ meses = {
     1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril', 5: 'Maio', 6: 'Junho',
     7: 'Julho', 8: 'Agosto', 9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
 }
+meses_2 = {
+    1: 'Jan', 2: 'Fev', 3: 'Mar', 4: 'Abr', 5: 'Mai', 6: 'Jun',
+    7: 'Jul', 8: 'Ago', 9: 'Set', 10: 'Out', 11: 'Nov', 12: 'Dez'
+}
 
 # Mapeando o número do mês para o nome do mês
 emp_aluno['mes'] = emp_aluno['mes'].map(meses)
 emp_aluno2['mes'] = emp_aluno2['mes'].map(meses)
 livros_mais_emprestados['mes'] = livros_mais_emprestados['mes'].map(meses)
 qtd_emprestimo_mes['mes'] = qtd_emprestimo_mes['mes'].map(meses)
-df['mes'] = df['mes'].map(meses)
+df['mes'] = df['mes'].map(meses_2)
+genero_m_emprestados['mes'] = genero_m_emprestados['mes'].map(meses)
 
 # Agrupar por mês e livro, contar os empréstimos
 col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(8)
@@ -327,8 +338,15 @@ st.plotly_chart(fig1)
 custom_colors = ['#BEA6FF', '#AF54E4', '#A18AC2', '#8E74D2',
                  '#751AAA', '#DCCEFF', '#A887FF', '#4E358E',
                  '#7B7097', '#824BA7']
+
+# Filtrando os dados com base nas seleções de ano e mês
+dados_filtrados = genero_m_emprestados[
+    (genero_m_emprestados['ano'] == ano_selecionado) & 
+    (genero_m_emprestados['mes'] == mes_selecionado)
+]
+
 # Gráfico de barra (gêneros mais emprestados)
-fig2 = px.bar(genero_m_emprestados, x='Gênero',
+fig2 = px.bar(dados_filtrados, x='Gênero',
               y='Quantidade',
               title='Ranking de gêneros mais emprestados',
               color_discrete_sequence=custom_colors,
