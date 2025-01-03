@@ -292,7 +292,7 @@ with col3:
 fig1 = px.bar(df,
               x='Mês', 
               y='Quantidade', 
-              title='Emprestimos',
+              title='Emprestimos anual/mensal',
               color_discrete_sequence=["#65558F"],
               text='Quantidade')
 fig1.update_layout(
