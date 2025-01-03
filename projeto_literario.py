@@ -292,7 +292,7 @@ with col3:
 fig1 = px.bar(df,
               x='Mês', 
               y='Quantidade', 
-              title='Meses com mais emprestimo',
+              title='Emprestimos',
               color_discrete_sequence=["#65558F"],
               text='Quantidade')
 fig1.update_layout(
@@ -348,7 +348,7 @@ dados_filtrados = genero_m_emprestados[
 # Gráfico de barra (gêneros mais emprestados)
 fig2 = px.bar(dados_filtrados, x='Gênero',
               y='Quantidade',
-              title='Ranking de gêneros mais emprestados',
+              title='Gêneros',
               color_discrete_sequence=custom_colors,
               color='Gênero',
               text='Quantidade')
@@ -448,7 +448,7 @@ with bar1:
     })
     livros_mais_emprestados_filtrado = livros_mais_emprestados_filtrado[['Título', 'n° emprestimos']].nlargest(10, 'n° emprestimos')
     livros_mais_emprestados_filtrado = livros_mais_emprestados_filtrado.to_html(index=False)
-    st.write("## Livros que mais foram emprestados")
+    st.write("## Livros mais emprestados")
     st.write("Mês:", mes_selecionado)
     st.markdown(f'<div class="center-table">{livros_mais_emprestados_filtrado}</div>', unsafe_allow_html=True)
 
@@ -461,7 +461,7 @@ with bar2:
     })
     emp_aluno_filtrado = emp_aluno_filtrado[['Nome', 'n° emprestimos']].nlargest(10, 'n° emprestimos')
     emp_aluno_filtrado = emp_aluno_filtrado.to_html(index=False, escape=False)
-    st.write("## Alunos com mais livros emprestados")
+    st.write("## Ranking de alunos")
     st.write("Mês:", mes_selecionado)
     st.markdown(f'<div class="center-table">{emp_aluno_filtrado}</div>', unsafe_allow_html=True)
     
