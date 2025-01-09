@@ -1,6 +1,0 @@
-[theme]
-primaryColor = "#ECE6F0"
-secondaryBackgroundColor ="#f0f0f0"
-
-[server]
-enableCORS = false
