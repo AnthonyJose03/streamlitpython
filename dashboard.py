@@ -464,7 +464,7 @@ def totalizador(label, valor, df, file_name):
     excel_base64 = to_base64(excel.read())
     
     totalizador_imagem = f"""
-        <div style="background: #8E58BF; padding: 2px; border-radius: 15px; width: 450px;  
+        <div style="background: #8E58BF; padding: 2px; border-radius: 15px; width: 92%;  
                     display: flex; justify-content: space-between; align-items: center; text-align: left;
                     padding-left: 19px"> 
             <div style="flex: 3">
@@ -474,8 +474,8 @@ def totalizador(label, valor, df, file_name):
             </div>
             <a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{excel_base64}" 
                 download="{file_name}" 
-                style="position: absolute; bottom: 0px; right: 60px; text-decoration: none;">
-                <img src="data:image/svg+xml;base64,{encoded_image}" alt="Ícone de download" style="width: 40px; height: 40px;" />
+                style="position: absolute; bottom: 0px; right: 12%; text-decoration: none;">
+                <img src="data:image/svg+xml;base64,{encoded_image}" alt="Ícone de download" style="width: 100%; height: 40px;" />
         </a>
             </div>
         </div>
