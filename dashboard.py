@@ -745,6 +745,14 @@ if mes_selecionado == 'Todos os meses':
                         font_size = 20
                     ))
 
+    # Arredondando as bordas das barras
+    fig1.update_traces(marker=dict(
+        line=dict(
+            width=0.1
+        ), 
+        cornerradius=10 
+    ))
+
     # totalizador dos emprestimos anuais
     totalizador = quantidade_ano[quantidade_ano['ano'] == ano_selecionado]
     total_emprestimos = totalizador['quantidade_emprestimos'].sum()
@@ -844,6 +852,15 @@ else:
                         font_size = 20
                     ))
 
+    
+    # Arredondando as bordas das barras
+    fig1.update_traces(marker=dict(
+        line=dict(
+            width=0.1
+        ), 
+        cornerradius=10 
+    ))
+
     # totalizador dos emprestimos anuais
     totalizador = quantidade_ano[quantidade_ano['ano'] == ano_selecionado]
     total_emprestimos = totalizador['quantidade_emprestimos'].sum()
@@ -923,6 +940,13 @@ if mes_selecionado and mes_selecionado != 'Todos os meses':
             )
         )
     )
+    # Arredondando as bordas das barras
+    fig2.update_traces(marker=dict(
+        line=dict(
+            width=0.1
+        ), 
+        cornerradius=10 
+    ))
 
     # sobrepondo as barras do gráfico de gêneros
     fig2.update_traces(textposition='outside',
@@ -1026,6 +1050,14 @@ else:
                             font_size = 18
                     ))
 
+    # Arredondando as bordas das barras
+    fig2.update_traces(marker=dict(
+        line=dict(
+            width=0.1
+        ), 
+        cornerradius=10 
+    ))
+    
     max_y2 = genero_total_filtrado['Quantidade'].max()
 
     fig2.update_layout(
