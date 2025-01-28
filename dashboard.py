@@ -1106,7 +1106,7 @@ with bar1:
         })
         livros_total_filtrado = livros_total_filtrado.groupby('Título')['N° empréstimos'].sum().reset_index()
         livros_tabela = livros_total_filtrado
-        livros_total_filtrado = livros_total_filtrado[['Título', 'N° empréstimos']].nlargest(10, 'n° empréstimos')
+        livros_total_filtrado = livros_total_filtrado[['Título', 'N° empréstimos']].nlargest(10, 'N° empréstimos')
         livros_total_filtrado = livros_total_filtrado.to_html(index=False)        
         st.write("## Ranking de livros")
         st.markdown(f'<div class="center-table">{livros_total_filtrado}</div>', unsafe_allow_html=True)
