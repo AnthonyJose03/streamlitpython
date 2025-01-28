@@ -645,7 +645,7 @@ with nuvem2:
     wordcloud, livros_mais_emprestados_mes = gerar_nuvem_emprestimos(emprestimo_aluno, ano_selecionado, mes_selecionado)
 
     if not mes_selecionado:  # Verifica se a lista mes_selecionado está vazia (nenhum mês selecionado)
-        st.subheader(f'Livros mais emprestados no ano {ano_selecionado}')
+        st.subheader(f'Livros mais emprestados em {ano_selecionado}')
     else:
         st.subheader(f'Livros mais emprestados no período selecionado')
     
@@ -898,7 +898,7 @@ if mes_selecionado and mes_selecionado != 'Todos os meses':
     
     # Gerando o gráfico de barras
     fig2 = px.bar(genero_total_filtrado, x='Gênero', y='Quantidade',
-                title=f'Empréstimos por Gênero - Ano {ano_selecionado}',
+                title=f'Empréstimos por gênero',
                 color_discrete_sequence=custom_colors,
                 color='Gênero',
                 text='Quantidade')
@@ -998,7 +998,7 @@ else:
 
     # Gerando o gráfico de barras
     fig2 = px.bar(genero_total_filtrado, x='Gênero', y='Quantidade',
-                title=f'Empréstimos por Gênero - Ano {ano_selecionado}',
+                title=f'Empréstimos por gênero',
                 color_discrete_sequence=custom_colors,
                 color='Gênero',
                 text='Quantidade')
@@ -1140,14 +1140,13 @@ with bar1:
     if 'Todos os meses' in mes_selecionado or not mes_selecionado:
         livros_total_filtrado = livros_total_filtrado_ano.rename(columns={
             'titulo': 'Título',
-            'quantidade_emprestimos': 'n° empréstimos'
+            'quantidade_emprestimos': 'N° empréstimos'
         })
-        livros_total_filtrado = livros_total_filtrado.groupby('Título')['n° empréstimos'].sum().reset_index()
+        livros_total_filtrado = livros_total_filtrado.groupby('Título')['N° empréstimos'].sum().reset_index()
         livros_tabela = livros_total_filtrado
-        livros_total_filtrado = livros_total_filtrado[['Título', 'n° empréstimos']].nlargest(10, 'n° empréstimos')
+        livros_total_filtrado = livros_total_filtrado[['Título', 'N° empréstimos']].nlargest(10, 'N° empréstimos')
         livros_total_filtrado = livros_total_filtrado.to_html(index=False)        
         st.write("## Ranking de livros")
-        st.write(f"##### Mês: {mes_selecionado}")
         st.markdown(f'<div class="center-table">{livros_total_filtrado}</div>', unsafe_allow_html=True)
         
         # Função para ajustar o arquivo Excel gerado
@@ -1201,16 +1200,15 @@ with bar1:
         ]
         livros_total_filtrado_mes_selecionado = livros_total_filtrado_mes_selecionado.rename(columns={
             'titulo': 'Título',
-            'quantidade_emprestimos': 'n° empréstimos'
+            'quantidade_emprestimos': 'N° empréstimos'
         })
         
         # Somando os empréstimos para os meses selecionados
-        livros_total_filtrado_mes_selecionado = livros_total_filtrado_mes_selecionado.groupby('Título')['n° empréstimos'].sum().reset_index()
+        livros_total_filtrado_mes_selecionado = livros_total_filtrado_mes_selecionado.groupby('Título')['N° empréstimos'].sum().reset_index()
         tabela_livros = livros_total_filtrado_mes_selecionado
-        livros_total_filtrado_mes_selecionado = livros_total_filtrado_mes_selecionado.nlargest(10, 'n° empréstimos')  # Pega os top 10 livros
+        livros_total_filtrado_mes_selecionado = livros_total_filtrado_mes_selecionado.nlargest(10, 'N° empréstimos')  # Pega os top 10 livros
         livros_total_filtrado_mes_selecionado = livros_total_filtrado_mes_selecionado.to_html(index=False)
         st.write("## Ranking de livros")
-        st.write(f"##### Mês: {mes_selecionado}")
         st.markdown(f'<div class="center-table">{livros_total_filtrado_mes_selecionado}</div>', unsafe_allow_html=True)
         
         # Função para ajustar o arquivo Excel gerado
@@ -1270,16 +1268,15 @@ with bar2:
         # Caso "Todos os meses" ou nenhum mês tenha sido selecionado, mostrar os dados do ano completo
         total_alunos_filtrado = total_alunos_filtrado_ano_completo.rename(columns={
             'nome': 'Nome',
-            'quantidade_emprestimos': 'n° empréstimos'
+            'quantidade_emprestimos': 'N° empréstimos'
         })
         # Somando todos os empréstimos para o ano
-        total_alunos_filtrado = total_alunos_filtrado.groupby('Nome')['n° empréstimos'].sum().reset_index()
+        total_alunos_filtrado = total_alunos_filtrado.groupby('Nome')['N° empréstimos'].sum().reset_index()
         tabela_alunos = total_alunos_filtrado
-        total_alunos_filtrado = total_alunos_filtrado.nlargest(10, 'n° empréstimos')  # Pega os top 10 alunos
+        total_alunos_filtrado = total_alunos_filtrado.nlargest(10, 'N° empréstimos')  # Pega os top 10 alunos
         tabela_total_alunos = total_alunos_filtrado
         total_alunos_filtrado = total_alunos_filtrado.to_html(index=False, escape=False)
-        st.write("## Ranking de alunos (Ano completo)")
-        st.write("##### Mês: Todos os meses")
+        st.write("## Ranking de alunos")
         st.markdown(f'<div class="center-table">{total_alunos_filtrado}</div>', unsafe_allow_html=True)
         
         # Função para ajustar o arquivo Excel gerado
@@ -1333,15 +1330,14 @@ with bar2:
         ]
         total_alunos_filtrado_mes_selecionado = total_alunos_filtrado_mes_selecionado.rename(columns={
             'nome': 'Nome',
-            'quantidade_emprestimos': 'n° empréstimos'
+            'quantidade_emprestimos': 'N° empréstimos'
         })
         # Somando os empréstimos para os meses selecionados
-        total_alunos_filtrado_mes_selecionado = total_alunos_filtrado_mes_selecionado.groupby('Nome')['n° empréstimos'].sum().reset_index()
+        total_alunos_filtrado_mes_selecionado = total_alunos_filtrado_mes_selecionado.groupby('Nome')['N° empréstimos'].sum().reset_index()
         tabela_alunos = total_alunos_filtrado_mes_selecionado
-        total_alunos_filtrado_mes_selecionado = total_alunos_filtrado_mes_selecionado.nlargest(10, 'n° empréstimos')  # Pega os top 10 alunos
+        total_alunos_filtrado_mes_selecionado = total_alunos_filtrado_mes_selecionado.nlargest(10, 'N° empréstimos')  # Pega os top 10 alunos
         total_alunos_filtrado_mes_selecionado = total_alunos_filtrado_mes_selecionado.to_html(index=False, escape=False)
         st.write(f"## Ranking de alunos")
-        st.write(f"#### Mês: {mes_selecionado}")
         st.markdown(f'<div class="center-table">{total_alunos_filtrado_mes_selecionado}</div>', unsafe_allow_html=True)
     
         # Função para ajustar o arquivo Excel gerado
