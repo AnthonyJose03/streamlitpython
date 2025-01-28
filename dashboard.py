@@ -316,6 +316,31 @@ order by
     ano, quantidade_emprestimos desc;
 """
 
+pessoas_com_livro = """
+WITH emprestimo AS (
+    SELECT 
+        aluno.id,
+        aluno.nome as "Nome",
+        aluno.telefone as "Telefone"
+    FROM emprestimo
+    LEFT JOIN aluno ON emprestimo.id_aluno = aluno.id
+    where emprestimo.id_escola = %s
+)
+SELECT DISTINCT ON (id) id, "Nome", "Telefone"
+FROM emprestimo
+ORDER BY id;
+"""
+
+pessoas_cadastradas = """
+select 
+    id,
+    nome as "Nome",
+    telefone as "Telefone"
+from 
+    aluno a 
+where 
+    id_escola = %s
+"""
 
 @st.cache_data
 def execute_query(query, id_escola):
@@ -340,7 +365,8 @@ acervo_geral = execute_query(acervo_geral, id_escola)
 genero_total = execute_query(genero_total, id_escola)
 livros_total = execute_query(livros_total, id_escola)
 total_alunos = execute_query(total_alunos, id_escola)
-
+pessoas_com_livro = execute_query(pessoas_com_livro, id_escola)
+pessoas_cadastradas = execute_query(pessoas_cadastradas, id_escola)
 
 # rotulação dos meses
 qtd_emprestimo_mes['Ano'] = qtd_emprestimo_mes['Ano'].astype(int)
@@ -484,18 +510,57 @@ def totalizador(label, valor, df, file_name):
     st.markdown(totalizador_imagem, unsafe_allow_html=True)
 
 
+# totalizador de pessoas cadastradas
+print(pessoas_cadastradas)
+tabela_cadastro = pessoas_cadastradas
+totalizador_cadastro = pessoas_cadastradas['id'].count()
+pessoas_cadastradas = pessoas_cadastradas[['Nome', 'Telefone']]
+
+# totalizador de pessoas com livro
+print(pessoas_com_livro)
+totalizador_pessoas_com_livro = pessoas_com_livro['id'].count()
+tabela_pessoas_com_livro = pessoas_com_livro[['Nome', 'Telefone']]
+
+# imagem de download
+image_path2 = "icone_download_preto.svg"
+
+with open(image_path2, 'rb') as image_file:
+    encoded_image2 = base64.b64encode(image_file.read()).decode('utf-8')
+
+def to_base64(file_data):
+    return base64.b64encode(file_data).decode('utf-8')
+
+
+def tabela_download(df, file_name):
+    excel = ajustar_excel(df)
+    excel_base64 = to_base64(excel.read())
+    
+    imagem_download = f"""
+            <a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{excel_base64}" 
+                download="{file_name}" 
+                style="position: absolute; bottom: 0px; right: 12%; text-decoration: none;">
+                <img src="data:image/svg+xml;base64,{encoded_image2}" alt="Ícone de download" style="width: 100%; height: 40px;" />
+        </a>
+            </div>
+        </div>
+    """
+    
+    st.markdown(imagem_download, unsafe_allow_html=True)
+
+
+
 # totalizador do acervo geral e o botão de download
 col1, col2, col3, col4 = st.columns([0.85, 2.4, 4, 1])
 with col2:
     totalizador("Acervo geral", acervo_total, acervo_geral, "acervo_geral.xlsx")
     st.write("")
     st.write("")
-    totalizador("Pessoas cadastradas", emprestimos, status_alunos, "emprestimos.xlsx")
+    totalizador("Pessoas cadastradas", totalizador_cadastro, pessoas_cadastradas, "pessoas_cadastradas.xlsx")
     st.write("")
     st.write("")
-    totalizador("Pessoas com livros emprestados", 7, acervo_geral, "pessoas_emprestadas.xlsx")
+    totalizador("Pessoas com livros emprestados", totalizador_pessoas_com_livro, tabela_pessoas_com_livro, "pessoas_com_livro.xlsx")
 with col3:
-    with st.container(height= 498,border=True):
+    with st.container(height= 501,border=True):
         
         st.write("")
         # gráfico de pizza (distribuição dos livros)
@@ -506,7 +571,7 @@ with col3:
                 color='Status', 
                 color_discrete_map={'Em dia': '#D9D9D9',
                                     'Em atraso': '#CA3336'},
-                height= 444)
+                height= 400)
         
         # parâmetros do gráfico
         fig_status.update_layout(
@@ -522,7 +587,7 @@ with col3:
                     color="black"# Tamanho da fonte da legenda (em pixels)
                 )
             ),
-            margin=dict(l=30, r=30, t=50, b=30)
+            margin=dict(l=30, r=30, t=50, b=0)
         )
 
         # Sobrepondo o valor das fatias
@@ -550,7 +615,9 @@ with col3:
                     ),
                     textinfo= 'value')
     
+        
         st.plotly_chart(fig_status, use_container_width=True)
+        tabela_download(status_alunos, "emprestimos.xlsx")
     
 st.write("")
 st.write("")
@@ -1257,10 +1324,10 @@ with bar1:
     )
 
 # Total de alunos filtrado pelo ano selecionado
-print(total_alunos)
+
 total_alunos_filtrado_ano_completo = total_alunos[total_alunos['ano'] == ano_selecionado]
 total_alunos_filtrado_ano_completo['mes'] = total_alunos_filtrado_ano_completo['mes'].map(meses)
-print(total_alunos_filtrado_ano_completo)
+
 
 with bar2:
     # Verificando se foi selecionado "Todos os meses" ou nenhum mês foi selecionado
