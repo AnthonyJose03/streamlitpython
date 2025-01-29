@@ -538,7 +538,7 @@ def tabela_download(df, file_name):
     imagem_download = f"""
             <a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{excel_base64}" 
                 download="{file_name}" 
-                style="position: absolute; bottom: 0px; right: 12%; text-decoration: none;">
+                style="position: absolute; bottom: -20px; right: 1%; text-decoration: none;">
                 <img src="data:image/svg+xml;base64,{encoded_image2}" alt="Ícone de download" style="width: 100%; height: 40px;" />
         </a>
             </div>
@@ -546,7 +546,6 @@ def tabela_download(df, file_name):
     """
     
     st.markdown(imagem_download, unsafe_allow_html=True)
-
 
 
 # totalizador do acervo geral e o botão de download
@@ -861,7 +860,8 @@ else:
                 size=22,
                 color="black"      # Tamanho da fonte dos rótulos do eixo X
             )
-        ),
+        )
+        ,
         yaxis=dict(
             title=dict(
                 font=dict(
@@ -968,7 +968,8 @@ if mes_selecionado and mes_selecionado != 'Todos os meses':
                 title=f'Empréstimos por gênero',
                 color_discrete_sequence=custom_colors,
                 color='Gênero',
-                text='Quantidade')
+                text='Quantidade',
+                height=800)
     fig2.update_layout(
         title=dict(
             font=dict(
@@ -1023,9 +1024,6 @@ if mes_selecionado and mes_selecionado != 'Todos os meses':
                         hoverlabel = dict(
                             font_size = 18
                     ))
-
-    max_y2 = genero_total_filtrado['Quantidade'].max()
-
     fig2.update_layout(
         xaxis=dict(
             tickmode='array',  # Garantir que todos os ticks sejam mostrados
@@ -1038,11 +1036,6 @@ if mes_selecionado and mes_selecionado != 'Todos os meses':
         height=500  # Altura
     )
 
-    fig2.update_layout(
-        yaxis=dict(
-            range=[0, max_y2 * 1.1]  # Ajuste do limite superior (aumentando 10% do valor máximo)
-        )
-    )
     fig2.update_layout(
         legend=dict(
             title=dict(  # Texto do título da legenda
@@ -1156,54 +1149,15 @@ else:
 with st.container(border=True):
     st.plotly_chart(fig2, use_container_width=True, config=config)    
     
-# Estilização das tabelas
-st.markdown(
-    """
-    <style>
-    .center-table {
-        display: flex;
-        justify-content: left;
-        align-items: left;
-    }
-    table {
-        font-size: 20px;
-        width: 75%; /* Ajuste o tamanho da tabela aqui */
-        border-radius: 10px;
-        border-collapse: collapse;
-        border: 6px #080808;
-        overflow: hidden;
-    }
-    th, td {
-        text-align: left;
-        border: 4px solid #ddd;
-        padding: 8px;
-    }
-    th {
-        color: white;
-        background-color: #8E58BF;
-        font-weight: bold;
-    }
-    /* Linhas com fundo branco e roxo claro alternado */
-    tr:nth-child(odd) {
-        background-color: #65558F17; /* Cinza claro */
-    }
-    tr:nth-child(even) {
-        background-color: white; /* Branco */
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-    )
-
-
-# Tabelas de livros e alunos
-bar1, bar2 = st.columns([2.6, 2])
 
 # Total de livros pelo ano selecionado
 livros_total_filtrado_ano = livros_total[livros_total['ano'] == ano_selecionado]
 livros_total_filtrado_ano['mes'] = livros_total_filtrado_ano['mes'].map(meses)
 
-with bar1:
+# Gráfico de barras de livros
+coluna1, coluna2 = st.columns(2)
+with coluna1:
+    # Verificando se foi selecionado "Todos os meses" ou nenhum mês foi selecionado
     if 'Todos os meses' in mes_selecionado or not mes_selecionado:
         livros_total_filtrado = livros_total_filtrado_ano.rename(columns={
             'titulo': 'Título',
@@ -1212,54 +1166,95 @@ with bar1:
         livros_total_filtrado = livros_total_filtrado.groupby('Título')['N° empréstimos'].sum().reset_index()
         livros_tabela = livros_total_filtrado
         livros_total_filtrado = livros_total_filtrado[['Título', 'N° empréstimos']].nlargest(10, 'N° empréstimos')
-        livros_total_filtrado = livros_total_filtrado.to_html(index=False)        
-        st.write("## Ranking de livros")
-        st.markdown(f'<div class="center-table">{livros_total_filtrado}</div>', unsafe_allow_html=True)
-        
-        # Função para ajustar o arquivo Excel gerado
-        def ajustar_excel(df):
-            # Salvar o DataFrame em um arquivo Excel em memória (sem salvar no disco)
-            output = BytesIO()
-            df.to_excel(output, index=False, engine='openpyxl')
-            output.seek(0)
+        livros_total_filtrado = livros_total_filtrado.sort_values("N° empréstimos")
+        # Gerando o gráfico de barras
+        fig3 = px.bar(livros_total_filtrado, x='N° empréstimos', y='Título',
+                    title=f'Ranking de livros',
+                    text='N° empréstimos',
+                    height=600,
+                    orientation='h',
+                    color_discrete_sequence=["#8E58BF"])
+        fig3.update_layout(
+            title=dict(
+                font=dict(
+                    size=26             # Tamanho da fonte do título
+                )
+            ),
+            xaxis=dict(
+                title=dict(
+                    font=dict(
+                        size=22,
+                        color="black"   # Tamanho da fonte do título do eixo X
+                    )
+                ),
+                showgrid=True,
+                tickfont=dict(
+                    size=22,
+                    color="black"
+                                        # Tamanho da fonte dos rótulos do eixo X
+                )
+            ),
+            yaxis=dict(
+                title=dict(
+                    font=dict(
+                        size=22,
+                        color="black"   # Tamanho da fonte do título do eixo Y
+                    )
+                ),
+                tickfont=dict(
+                    size=22,
+                    color="black"       # Tamanho da fonte dos rótulos do eixo Y
+                )
+            ),
+            legend=dict(
+                font=dict(
+                    size=20,
+                    color="black"       # Tamanho da fonte da legenda
+                )
+            )
+        )
 
-            # Abrir o arquivo Excel gerado
-            wb = load_workbook(output)
-            ws = wb.active
-            
-            # Criar um estilo de data
-            data_style = NamedStyle(name="data_style")
-            
-            # Ajustar largura da coluna de datas (supondo que a data esteja na coluna A)
-            ws.column_dimensions['A'].width = 30  # Ajustar a largura da coluna A
-            ws.column_dimensions['B'].width = 20  # Ajustar a largura da coluna B
-            ws.column_dimensions['C'].width = 20  # Ajustar a largura da coluna C
-                    
-            # Aplicar o estilo de data para todas as células da coluna A
-            for cell in ws['A']:
-                cell.style = data_style
-            
-            for cell in ws['B']:
-                cell.style = data_style
-            
-            for cell in ws['C']:
-                cell.style = data_style
-            
-            # Salvar o arquivo Excel com as modificações
-            output.seek(0)
-            wb.save(output)
-            output.seek(0)
-            
-            return output
-        
-        # Download dos livros
-        excel = ajustar_excel(livros_tabela)
-        st.download_button(
-        label="Baixar relatório de empréstimos",
-        data=excel,
-        file_name='tabela_livros.xlsx',
-        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
+        fig3.update_yaxes(title=None)
+
+        # sobrepondo as barras do gráfico de gêneros
+        fig3.update_traces(textposition='outside',
+                            textfont=dict(size=22,
+                                        color='black'),
+                            hovertemplate = '<b>%{label}</b><br>Quantidade: %{value}<extra></extra>',
+                            hoverlabel = dict(
+                                font_size = 18
+                        ))
+
+        # Arredondando as bordas das barras
+        fig3.update_traces(marker=dict(
+            line=dict(
+                width=0.1
+            ), 
+            cornerradius=10 
+        ))
+
+        fig3.update_layout(
+            xaxis=dict(
+                tickmode='array',  # Garantir que todos os ticks sejam mostrados
+                tickvals=livros_total_filtrado['Título'],  # Certifica que os livros são usados
+            )
+        )
+
+        fig3.update_layout(
+            width=800,  # Largura
+            height=700  # Altura
+        )
+
+        fig3.update_layout(
+            legend=dict(
+                title=dict(  # Texto do título da legenda
+                    font=dict(size=20)  # Tamanho da fonte do título
+                ),
+            )
+        )
+        with st.container(height=780 ,border=True):
+            st.plotly_chart(fig3, use_container_width=True, config=config)
+            tabela_download(livros_tabela, "ranking_livros.xlsx")
     else:
         # Caso contrário, filtra pelos meses selecionados
         livros_total_filtrado_mes_selecionado = livros_total_filtrado_ano[
@@ -1274,62 +1269,100 @@ with bar1:
         livros_total_filtrado_mes_selecionado = livros_total_filtrado_mes_selecionado.groupby('Título')['N° empréstimos'].sum().reset_index()
         tabela_livros = livros_total_filtrado_mes_selecionado
         livros_total_filtrado_mes_selecionado = livros_total_filtrado_mes_selecionado.nlargest(10, 'N° empréstimos')  # Pega os top 10 livros
-        livros_total_filtrado_mes_selecionado = livros_total_filtrado_mes_selecionado.to_html(index=False)
-        st.write("## Ranking de livros")
-        st.markdown(f'<div class="center-table">{livros_total_filtrado_mes_selecionado}</div>', unsafe_allow_html=True)
-        
-        # Função para ajustar o arquivo Excel gerado
-        def ajustar_excel(df):
-            # Salvar o DataFrame em um arquivo Excel em memória (sem salvar no disco)
-            output = BytesIO()
-            df.to_excel(output, index=False, engine='openpyxl')
-            output.seek(0)
+        livros_total_filtrado_mes_selecionado = livros_total_filtrado_mes_selecionado.sort_values("N° empréstimos")
+        # Gerando o gráfico de barras
+        fig3 = px.bar(livros_total_filtrado_mes_selecionado, x='N° empréstimos', y='Título',
+                    title=f'Ranking de livros',
+                    text='N° empréstimos',
+                    height=600,
+                    orientation='h',
+                    color_discrete_sequence=["#8E58BF"])
+        fig3.update_layout(
+            title=dict(
+                font=dict(
+                    size=26             # Tamanho da fonte do título
+                )
+            ),
+            xaxis=dict(
+                title=dict(
+                    font=dict(
+                        size=22,
+                        color="black"   # Tamanho da fonte do título do eixo X
+                    )
+                ),
+                tickfont=dict(
+                    size=22,
+                    color="black"
+                                        # Tamanho da fonte dos rótulos do eixo X
+                )
+            ),
+            yaxis=dict(
+                title=dict(
+                    font=dict(
+                        size=22,
+                        color="black"   # Tamanho da fonte do título do eixo Y
+                    )
+                ),
+                tickfont=dict(
+                    size=22,
+                    color="black"       # Tamanho da fonte dos rótulos do eixo Y
+                )
+            ),
+            legend=dict(
+                font=dict(
+                    size=20,
+                    color="black"       # Tamanho da fonte da legenda
+                )
+            )
+        )
 
-            # Abrir o arquivo Excel gerado
-            wb = load_workbook(output)
-            ws = wb.active
-            
-            # Criar um estilo de data
-            data_style = NamedStyle(name="data_style")
-            
-            # Ajustar largura da coluna de datas (supondo que a data esteja na coluna A)
-            ws.column_dimensions['A'].width = 30  # Ajustar a largura da coluna A
-            ws.column_dimensions['B'].width = 20  # Ajustar a largura da coluna B
-            ws.column_dimensions['C'].width = 20  # Ajustar a largura da coluna C
-                    
-            # Aplicar o estilo de data para todas as células da coluna A
-            for cell in ws['A']:
-                cell.style = data_style
-            
-            for cell in ws['B']:
-                cell.style = data_style
-            
-            for cell in ws['C']:
-                cell.style = data_style
-            
-            # Salvar o arquivo Excel com as modificações
-            output.seek(0)
-            wb.save(output)
-            output.seek(0)
-            
-            return output
-        
-        # Download dos livros
-        excel = ajustar_excel(tabela_livros)
-        st.download_button(
-        label="Baixar relatório de empréstimos",
-        data=excel,
-        file_name='tabela_livros.xlsx',
-        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
+        # sobrepondo as barras do gráfico de gêneros
+        fig3.update_traces(textposition='outside',
+                            textfont=dict(size=22,
+                                        color='black'),
+                            hovertemplate = '<b>%{label}</b><br>Quantidade: %{value}<extra></extra>',
+                            hoverlabel = dict(
+                                font_size = 18
+                        ))
 
-# Total de alunos filtrado pelo ano selecionado
+        # Arredondando as bordas das barras
+        fig3.update_traces(marker=dict(
+            line=dict(
+                width=0.1
+            ), 
+            cornerradius=10 
+        ))
+    
+        fig3.update_yaxes(title=None)
+        
+        fig3.update_layout(
+            xaxis=dict(
+                tickmode='array',  # Garantir que todos os ticks sejam mostrados
+                tickvals=livros_total_filtrado_mes_selecionado['Título'],  # Certifica que os livros são usados
+            )
+        )
+
+        fig3.update_layout(
+            width=800,  # Largura
+            height=700  # Altura
+        )
+
+        fig3.update_layout(
+            legend=dict(
+                title=dict(  # Texto do título da legenda
+                    font=dict(size=20)  # Tamanho da fonte do título
+                ),
+            )
+        )
+        with st.container(height=780 ,border=True):
+            st.plotly_chart(fig3, use_container_width=True, config=config)
+            tabela_download(tabela_livros, "ranking_livros.xlsx")
 
 total_alunos_filtrado_ano_completo = total_alunos[total_alunos['ano'] == ano_selecionado]
 total_alunos_filtrado_ano_completo['mes'] = total_alunos_filtrado_ano_completo['mes'].map(meses)
 
-
-with bar2:
+# Gráfico de ranking de alunos
+with coluna2:
     # Verificando se foi selecionado "Todos os meses" ou nenhum mês foi selecionado
     if 'Todos os meses' in mes_selecionado or not mes_selecionado:
         # Caso "Todos os meses" ou nenhum mês tenha sido selecionado, mostrar os dados do ano completo
@@ -1342,53 +1375,97 @@ with bar2:
         tabela_alunos = total_alunos_filtrado
         total_alunos_filtrado = total_alunos_filtrado.nlargest(10, 'N° empréstimos')  # Pega os top 10 alunos
         tabela_total_alunos = total_alunos_filtrado
-        total_alunos_filtrado = total_alunos_filtrado.to_html(index=False, escape=False)
-        st.write("## Ranking de alunos")
-        st.markdown(f'<div class="center-table">{total_alunos_filtrado}</div>', unsafe_allow_html=True)
-        
-        # Função para ajustar o arquivo Excel gerado
-        def ajustar_excel(df):
-            # Salvar o DataFrame em um arquivo Excel em memória (sem salvar no disco)
-            output = BytesIO()
-            df.to_excel(output, index=False, engine='openpyxl')
-            output.seek(0)
+        total_alunos_filtrado = total_alunos_filtrado.sort_values("N° empréstimos")
+        # Gerando o gráfico de barras
+        fig4 = px.bar(total_alunos_filtrado,
+                    x="N° empréstimos",
+                    y="Nome",
+                    orientation='h',
+                    title=f"Ranking de alunos",
+                    height=800,
+                    text='N° empréstimos',
+                    color_discrete_sequence=["#8E58BF"])
+        fig4.update_layout(
+            title=dict(
+                font=dict(
+                    size=26             # Tamanho da fonte do título
+                )
+            ),
+            xaxis=dict(
+                title=dict(
+                    font=dict(
+                        size=22,
+                        color="black"   # Tamanho da fonte do título do eixo X
+                    )
+                ),
+                tickfont=dict(
+                    size=22,
+                    color="black"
+                                        # Tamanho da fonte dos rótulos do eixo X
+                )
+            ),
+            yaxis=dict(
+                title=dict(
+                    font=dict(
+                        size=22,
+                        color="black"   # Tamanho da fonte do título do eixo Y
+                    )
+                ),
+                tickfont=dict(
+                    size=22,
+                    color="black"       # Tamanho da fonte dos rótulos do eixo Y
+                )
+            ),
+            legend=dict(
+                font=dict(
+                    size=20,
+                    color="black"       # Tamanho da fonte da legenda
+                )
+            )
+        )
 
-            # Abrir o arquivo Excel gerado
-            wb = load_workbook(output)
-            ws = wb.active
-            
-            # Criar um estilo de data
-            data_style = NamedStyle(name="data_style")
-            
-            # Ajustar largura da coluna de datas (supondo que a data esteja na coluna A)
-            ws.column_dimensions['A'].width = 20  # Ajustar a largura da coluna A
-            ws.column_dimensions['B'].width = 20  # Ajustar a largura da coluna B
-            ws.column_dimensions['C'].width = 20  # Ajustar a largura da coluna C
-                    
-            # Aplicar o estilo de data para todas as células da coluna A
-            for cell in ws['A']:
-                cell.style = data_style
-            
-            for cell in ws['B']:
-                cell.style = data_style
-            
-            for cell in ws['C']:
-                cell.style = data_style
-            
-            # Salvar o arquivo Excel com as modificações
-            output.seek(0)
-            wb.save(output)
-            output.seek(0)
-            
-            return output
-        
-        excel = ajustar_excel(tabela_total_alunos)
-        st.download_button(
-            label="Baixar relatório de pessoas",
-            data=excel,
-            file_name='tabela_alunos.xlsx',
-            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-     )
+        fig4.update_yaxes(title=None)
+
+        # sobrepondo as barras do gráfico de gêneros
+        fig4.update_traces(textposition='outside',
+                            textfont=dict(size=22,
+                                        color='black'),
+                            hovertemplate = '<b>%{label}</b><br>Quantidade: %{value}<extra></extra>',
+                            hoverlabel = dict(
+                                font_size = 18
+                        ))
+
+        # Arredondando as bordas das barras
+        fig4.update_traces(marker=dict(
+            line=dict(
+                width=0.1
+            ), 
+            cornerradius=10 
+        ))
+    
+        fig4.update_layout(
+            xaxis=dict(
+                tickmode='array',  # Garantir que todos os ticks sejam mostrados
+                tickvals=total_alunos_filtrado['Nome'],  # Certifica que os nomes são usados
+            )
+        )
+
+        fig4.update_layout(
+            width=800,  # Largura
+            height=700  # Altura
+        )
+
+        fig4.update_layout(
+            legend=dict(
+                title=dict(  # Texto do título da legenda
+                    font=dict(size=20)  # Tamanho da fonte do título
+                ),
+            )
+        )
+        # plotando o grafico de barras (gêneros mais emprestados)
+        with st.container(height=780,border=True):
+            st.plotly_chart(fig4, use_container_width=True, config=config)
+            tabela_download(tabela_alunos, "ranking_alunos.xlsx")
             
     else:
         # Caso contrário, filtra pelos meses selecionados
@@ -1403,50 +1480,94 @@ with bar2:
         total_alunos_filtrado_mes_selecionado = total_alunos_filtrado_mes_selecionado.groupby('Nome')['N° empréstimos'].sum().reset_index()
         tabela_alunos = total_alunos_filtrado_mes_selecionado
         total_alunos_filtrado_mes_selecionado = total_alunos_filtrado_mes_selecionado.nlargest(10, 'N° empréstimos')  # Pega os top 10 alunos
-        total_alunos_filtrado_mes_selecionado = total_alunos_filtrado_mes_selecionado.to_html(index=False, escape=False)
-        st.write(f"## Ranking de alunos")
-        st.markdown(f'<div class="center-table">{total_alunos_filtrado_mes_selecionado}</div>', unsafe_allow_html=True)
-    
-        # Função para ajustar o arquivo Excel gerado
-        def ajustar_excel(df):
-            # Salvar o DataFrame em um arquivo Excel em memória (sem salvar no disco)
-            output = BytesIO()
-            df.to_excel(output, index=False, engine='openpyxl')
-            output.seek(0)
+        total_alunos_filtrado_mes_selecionado = total_alunos_filtrado_mes_selecionado.sort_values("N° empréstimos")
+        # Gerando o gráfico de barras
+        fig4 = px.bar(total_alunos_filtrado_mes_selecionado,
+                    x="N° empréstimos",
+                    y="Nome",
+                    orientation='h',
+                    title=f"Ranking de alunos",
+                    height=800,
+                    text='N° empréstimos',
+                    color_discrete_sequence=["#8E58BF"])
+        fig4.update_layout(
+            title=dict(
+                font=dict(
+                    size=26             # Tamanho da fonte do título
+                )
+            ),
+            xaxis=dict(
+                title=dict(
+                    font=dict(
+                        size=22,
+                        color="black"   # Tamanho da fonte do título do eixo X
+                    )
+                ),
+                tickfont=dict(
+                    size=22,
+                    color="black"
+                                        # Tamanho da fonte dos rótulos do eixo X
+                )
+            ),
+            yaxis=dict(
+                title=dict(
+                    font=dict(
+                        size=22,
+                        color="black"   # Tamanho da fonte do título do eixo Y
+                    )
+                ),
+                tickfont=dict(
+                    size=22,
+                    color="black"       # Tamanho da fonte dos rótulos do eixo Y
+                )
+            ),
+            legend=dict(
+                font=dict(
+                    size=20,
+                    color="black"       # Tamanho da fonte da legenda
+                )
+            )
+        )
 
-            # Abrir o arquivo Excel gerado
-            wb = load_workbook(output)
-            ws = wb.active
-            
-            # Criar um estilo de data
-            data_style = NamedStyle(name="data_style")
-            
-            # Ajustar largura da coluna de datas (supondo que a data esteja na coluna A)
-            ws.column_dimensions['A'].width = 20  # Ajustar a largura da coluna A
-            ws.column_dimensions['B'].width = 20  # Ajustar a largura da coluna B
-            ws.column_dimensions['C'].width = 20  # Ajustar a largura da coluna C
-                    
-            # Aplicar o estilo de data para todas as células da coluna A
-            for cell in ws['A']:
-                cell.style = data_style
-            
-            for cell in ws['B']:
-                cell.style = data_style
-            
-            for cell in ws['C']:
-                cell.style = data_style
-            
-            # Salvar o arquivo Excel com as modificações
-            output.seek(0)
-            wb.save(output)
-            output.seek(0)
-            
-            return output
-    
-        excel = convert_df_to_excel(tabela_alunos)
-        st.download_button(
-            label="Baixar relatório de pessoas",
-            data=excel,
-            file_name='tabela_alunos.xlsx',
-            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
+        fig4.update_yaxes(title=None)
+
+        # sobrepondo as barras do gráfico de gêneros
+        fig4.update_traces(textposition='outside',
+                            textfont=dict(size=22,
+                                        color='black'),
+                            hovertemplate = '<b>%{label}</b><br>Quantidade: %{value}<extra></extra>',
+                            hoverlabel = dict(
+                                font_size = 18
+                        ))
+
+        # Arredondando as bordas das barras
+        fig4.update_traces(marker=dict(
+            line=dict(
+                width=0.1
+            ), 
+            cornerradius=10 
+        ))
+
+        fig4.update_layout(
+            xaxis=dict(
+                tickmode='array',  # Garantir que todos os ticks sejam mostrados
+                tickvals=total_alunos_filtrado_mes_selecionado['Nome'],  # Certifica que os meses são usados
+            )
+        )
+
+        fig4.update_layout(
+            width=800,  # Largura
+            height=700  # Altura
+        )
+
+        fig4.update_layout(
+            legend=dict(
+                title=dict(  # Texto do título da legenda
+                    font=dict(size=20)  # Tamanho da fonte do título
+                ),
+            )
+        )
+        # plotando o grafico de barras (gêneros mais emprestados)
+        with st.container(height=780,border=True):
+            st.plotly_chart(fig4, use_container_width=True, config=config)
+            tabela_download(tabela_alunos, "ranking_alunos.xlsx")
