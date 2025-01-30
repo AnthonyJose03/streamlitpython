@@ -257,6 +257,8 @@ select
 	localizacao_pratileira
 from
 	livro
+where
+    id_escola = %s
 """
 
 genero_total = """
@@ -289,7 +291,7 @@ from
 left join
     emprestimo e on l.id = e.id_livro
 where
-    l.id_escola = 1
+    l.id_escola = %s
 group by
     l.titulo, ano, mes
 order by
@@ -466,9 +468,6 @@ def ajustar_excel(df):
     for cell in ws['A']:
         cell.style = data_style
             
-    for cell in ws['B']:
-        cell.style = data_style
-            
     for cell in ws['C']:
         cell.style = data_style
                         
@@ -511,13 +510,11 @@ def totalizador(label, valor, df, file_name):
 
 
 # totalizador de pessoas cadastradas
-print(pessoas_cadastradas)
 tabela_cadastro = pessoas_cadastradas
 totalizador_cadastro = pessoas_cadastradas['id'].count()
 pessoas_cadastradas = pessoas_cadastradas[['Nome', 'Telefone']]
 
 # totalizador de pessoas com livro
-print(pessoas_com_livro)
 totalizador_pessoas_com_livro = pessoas_com_livro['id'].count()
 tabela_pessoas_com_livro = pessoas_com_livro[['Nome', 'Telefone']]
 
@@ -701,8 +698,9 @@ def gerar_nuvem_emprestimos(emprestimo_aluno, ano_selecionado, mes_selecionado):
                           height=800,
                           max_words=30,
                           background_color='white').generate_from_frequencies(livros_freq)
-    
+
     return wordcloud, livros_mais_emprestados_mes
+
 
 # Exemplo de como você pode chamar a função e exibir a nuvem de palavras no Streamlit
 nuvem1, nuvem2, nuvem3 = st.columns([1, 6, 1])
@@ -1024,10 +1022,20 @@ if mes_selecionado and mes_selecionado != 'Todos os meses':
                         hoverlabel = dict(
                             font_size = 18
                     ))
+    
+    max_y2 = genero_total_filtrado['Quantidade'].max()
+
+    
     fig2.update_layout(
         xaxis=dict(
             tickmode='array',  # Garantir que todos os ticks sejam mostrados
             tickvals=genero_total['Gênero'],  # Certifica que os meses são usados
+        )
+    )
+
+    fig2.update_layout(
+        yaxis=dict(
+            range=[0, max_y2 * 1.1]  # Ajuste do limite superior (aumentando 10% do valor máximo)
         )
     )
 
@@ -1254,6 +1262,7 @@ with coluna1:
         )
         with st.container(height=780 ,border=True):
             st.plotly_chart(fig3, use_container_width=True, config=config)
+            livros_tabela = livros_tabela.sort_values(['N° empréstimos'], ascending=False)
             tabela_download(livros_tabela, "ranking_livros.xlsx")
     else:
         # Caso contrário, filtra pelos meses selecionados
@@ -1356,6 +1365,7 @@ with coluna1:
         )
         with st.container(height=780 ,border=True):
             st.plotly_chart(fig3, use_container_width=True, config=config)
+            tabela_livros = tabela_livros.sort_values(['N° empréstimos'], ascending=False)
             tabela_download(tabela_livros, "ranking_livros.xlsx")
 
 total_alunos_filtrado_ano_completo = total_alunos[total_alunos['ano'] == ano_selecionado]
@@ -1465,6 +1475,7 @@ with coluna2:
         # plotando o grafico de barras (gêneros mais emprestados)
         with st.container(height=780,border=True):
             st.plotly_chart(fig4, use_container_width=True, config=config)
+            tabela_alunos = tabela_alunos.sort_values(['N° empréstimos'], ascending=False)
             tabela_download(tabela_alunos, "ranking_alunos.xlsx")
             
     else:
@@ -1570,4 +1581,5 @@ with coluna2:
         # plotando o grafico de barras (gêneros mais emprestados)
         with st.container(height=780,border=True):
             st.plotly_chart(fig4, use_container_width=True, config=config)
+            tabela_alunos = tabela_alunos.sort_values(['N° empréstimos'], ascending=False)
             tabela_download(tabela_alunos, "ranking_alunos.xlsx")
