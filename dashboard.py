@@ -49,9 +49,6 @@ def ajustar_excel(df):
     for cell in ws["A"]:
         cell.style = data_style
 
-    for cell in ws["B"]:
-        cell.style = data_style
-
     for cell in ws["C"]:
         cell.style = data_style
 
@@ -704,6 +701,7 @@ with coluna1:
         
         with st.container(height=780, border=True):
             st.plotly_chart(fig3, use_container_width=True, config=config)
+            livros_tabela = livros_tabela.sort_values(["N° empréstimos"], ascending=False)
             tabela_download(livros_tabela, "ranking_livros.xlsx")
             
     else:
@@ -739,6 +737,7 @@ with coluna1:
         
         with st.container(height=780, border=True):
             st.plotly_chart(fig3, use_container_width=True, config=config)
+            tabela_livros = tabela_livros.sort_values(["N° empréstimos"], ascending=False)
             tabela_download(tabela_livros, "ranking_livros.xlsx")
 
 total_alunos_filtrado_ano_completo = total_alunos[total_alunos["ano"] == ano_selecionado]
@@ -767,6 +766,7 @@ with coluna2:
 
         with st.container(height=780, border=True):
             st.plotly_chart(fig4, use_container_width=True, config=config)
+            tabela_alunos = tabela_alunos.sort_values(["N° empréstimos"], ascending=False)
             tabela_download(tabela_alunos, "ranking_alunos.xlsx")
 
     else:
@@ -798,4 +798,5 @@ with coluna2:
 
         with st.container(height=780, border=True):
             st.plotly_chart(fig4, use_container_width=True, config=config)
+            tabela_alunos = tabela_alunos.sort_values(["N° empréstimos"], ascending=False)
             tabela_download(tabela_alunos, "ranking_alunos.xlsx")
